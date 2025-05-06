@@ -26,7 +26,7 @@ async fn handle_cron_event(_: Metadata) -> anyhow::Result<()> {
         channel.last_build_date().unwrap(),
         "%Y-%m-%d %H:%M:%S",
     )
-    .expect("Newspenguin Failed to parse date");
+    .unwrap();
 
     let recorded_last_build_date = last_build_date().await?;
 
@@ -70,8 +70,7 @@ async fn get_rss() -> anyhow::Result<Channel> {
 }
 
 async fn last_build_date() -> anyhow::Result<Option<NaiveDateTime>> {
-    let connection =
-        Connection::open("lachuoi").expect("lachuoi db connection error");
+    let connection = Connection::open("lachuoi").unwrap();
 
     let execute_params = [SqlValue::Text(DB_KEY_LAST_BUILD.to_string())];
     let rowset = connection.execute(
@@ -87,8 +86,7 @@ async fn last_build_date() -> anyhow::Result<Option<NaiveDateTime>> {
     match a.get::<&str>(0) {
         Some(a) => {
             let naive_dt =
-                NaiveDateTime::parse_from_str(a, "%Y-%m-%d %H:%M:%S")
-                    .expect("Failed to parse date");
+                NaiveDateTime::parse_from_str(a, "%Y-%m-%d %H:%M:%S").unwrap();
             Ok(Some(naive_dt))
         }
         None => Ok(None),
@@ -96,8 +94,7 @@ async fn last_build_date() -> anyhow::Result<Option<NaiveDateTime>> {
 }
 
 async fn update_last_build_date(d: NaiveDateTime) -> anyhow::Result<()> {
-    let connection =
-        Connection::open("lachuoi").expect("lachuoi db connection error");
+    let connection = Connection::open("lachuoi").unwrap();
     let execute_params = [
         SqlValue::Text(d.to_string()),
         SqlValue::Text(DB_KEY_LAST_BUILD.to_string()),
@@ -139,7 +136,7 @@ async fn get_new_items(
             item.pub_date().unwrap(),
             "%Y-%m-%d %H:%M:%S",
         )
-        .expect("Failed to parse date");
+        .unwrap();
         if dt < item_pub_date {
             new_items.push(item.clone());
         }
@@ -186,8 +183,7 @@ async fn post_to_mastodon(msgs: Vec<Item>) -> anyhow::Result<()> {
 }
 
 fn check_process_lock() -> anyhow::Result<Option<()>> {
-    let connection =
-        Connection::open("lachuoi").expect("lachuoi db connection error");
+    let connection = Connection::open("lachuoi").unwrap();
 
     let execute_params = [SqlValue::Text(DB_KEY_LOCK.to_string())];
     let rowset = connection.execute(
@@ -202,8 +198,7 @@ fn check_process_lock() -> anyhow::Result<Option<()>> {
     let updated_at = rowset.rows[0].get::<&str>(0).unwrap();
 
     let naive_dt =
-        NaiveDateTime::parse_from_str(updated_at, "%Y-%m-%d %H:%M:%S")
-            .expect("Newspenguin Failed to parse datetime");
+        NaiveDateTime::parse_from_str(updated_at, "%Y-%m-%d %H:%M:%S").unwrap();
 
     // Assume it's already in UTC (you can adjust here if it's in local time or another zone)
     let utc_dt: DateTime<Utc> =
@@ -223,8 +218,7 @@ fn check_process_lock() -> anyhow::Result<Option<()>> {
 
 fn process_lock() -> anyhow::Result<()> {
     println!("Newspenguin process lock");
-    let connection =
-        Connection::open("lachuoi").expect("lachuoi db connection error");
+    let connection = Connection::open("lachuoi").unwrap();
     let execute_params = [SqlValue::Text(DB_KEY_LOCK.to_string())];
     let _rowset = connection.execute(
         "INSERT INTO kv_store (key,value) VALUES (?, NULL)",
@@ -235,8 +229,7 @@ fn process_lock() -> anyhow::Result<()> {
 
 fn process_unlock() -> anyhow::Result<()> {
     println!("Newspenguin process unlock");
-    let connection =
-        Connection::open("lachuoi").expect("lachuoi db connection error");
+    let connection = Connection::open("lachuoi").unwrap();
     let execute_params = [SqlValue::Text(DB_KEY_LOCK.to_string())];
     let _rowset = connection.execute(
         "DELETE FROM kv_store WHERE key = ?",

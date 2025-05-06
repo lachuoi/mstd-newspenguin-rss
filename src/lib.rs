@@ -22,11 +22,9 @@ async fn handle_cron_event(_: Metadata) -> anyhow::Result<()> {
 
     let channel = get_rss().await.unwrap();
 
-    let rss_last_build_date = NaiveDateTime::parse_from_str(
-        channel.last_build_date().unwrap(),
-        "%Y-%m-%d %H:%M:%S",
-    )
-    .unwrap();
+    let rss_last_build_date =
+        NaiveDateTime::parse_from_str(channel.last_build_date().unwrap(), "%Y-%m-%d %H:%M:%S")
+            .unwrap();
 
     let recorded_last_build_date = last_build_date().await?;
 
@@ -36,8 +34,7 @@ async fn handle_cron_event(_: Metadata) -> anyhow::Result<()> {
     }
 
     if rss_last_build_date > recorded_last_build_date.unwrap() {
-        let new_items =
-            get_new_items(channel, recorded_last_build_date.unwrap()).await?;
+        let new_items = get_new_items(channel, recorded_last_build_date.unwrap()).await?;
         post_to_mastodon(new_items).await?;
         update_last_build_date(rss_last_build_date).await?;
     } else {
@@ -85,8 +82,7 @@ async fn last_build_date() -> anyhow::Result<Option<NaiveDateTime>> {
     let a = rowset.rows.first().unwrap();
     match a.get::<&str>(0) {
         Some(a) => {
-            let naive_dt =
-                NaiveDateTime::parse_from_str(a, "%Y-%m-%d %H:%M:%S").unwrap();
+            let naive_dt = NaiveDateTime::parse_from_str(a, "%Y-%m-%d %H:%M:%S").unwrap();
             Ok(Some(naive_dt))
         }
         None => Ok(None),
@@ -126,17 +122,11 @@ async fn update_last_build_date(d: NaiveDateTime) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn get_new_items(
-    channel: Channel,
-    dt: NaiveDateTime,
-) -> anyhow::Result<Vec<Item>> {
+async fn get_new_items(channel: Channel, dt: NaiveDateTime) -> anyhow::Result<Vec<Item>> {
     let mut new_items: Vec<Item> = Vec::new();
     for item in channel.items() {
-        let item_pub_date = NaiveDateTime::parse_from_str(
-            item.pub_date().unwrap(),
-            "%Y-%m-%d %H:%M:%S",
-        )
-        .unwrap();
+        let item_pub_date =
+            NaiveDateTime::parse_from_str(item.pub_date().unwrap(), "%Y-%m-%d %H:%M:%S").unwrap();
         if dt < item_pub_date {
             new_items.push(item.clone());
         }
@@ -197,12 +187,10 @@ fn check_process_lock() -> anyhow::Result<Option<()>> {
 
     let updated_at = rowset.rows[0].get::<&str>(0).unwrap();
 
-    let naive_dt =
-        NaiveDateTime::parse_from_str(updated_at, "%Y-%m-%d %H:%M:%S").unwrap();
+    let naive_dt = NaiveDateTime::parse_from_str(updated_at, "%Y-%m-%d %H:%M:%S").unwrap();
 
     // Assume it's already in UTC (you can adjust here if it's in local time or another zone)
-    let utc_dt: DateTime<Utc> =
-        DateTime::<Utc>::from_naive_utc_and_offset(naive_dt, Utc);
+    let utc_dt: DateTime<Utc> = DateTime::<Utc>::from_naive_utc_and_offset(naive_dt, Utc);
 
     let now = Utc::now();
     let some_ago = now - Duration::minutes(5);

@@ -10,8 +10,8 @@ test:
 
 # Lint the codebase
 lint:
-    cargo clippy --all-features -- -D warnings
-    cargo fmt -- --check
+    RUST_LOG=${RUST_LOG} cargo clippy --all-features -- -D warnings
+    RUST_LOG=${RUST_LOG} cargo fmt -- --check
 
 # Run unit tests with dynamic target
 test-unit:

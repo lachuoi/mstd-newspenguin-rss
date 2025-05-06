@@ -43,7 +43,6 @@ jobs:
         run: cargo install just
       
       - name: Just
-        run: |
-          just
+        run: just
         env:
           RUST_LOG: spin=trace

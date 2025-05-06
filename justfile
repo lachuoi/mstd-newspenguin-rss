@@ -11,7 +11,6 @@ test:
 # Lint the codebase
 lint:
     cargo clippy --all-features -- -D warnings
-    cargo fmt -- --version
     cargo fmt -- --check
 
 # Run unit tests with dynamic target

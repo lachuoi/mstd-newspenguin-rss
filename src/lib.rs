@@ -177,7 +177,7 @@ async fn post_to_mastodon(msgs: Vec<Item>) -> anyhow::Result<()> {
             .build();
         let response: Response = spin_sdk::http::send(request).await?;
 
-        if response.status() == 200u16 {
+        if *response.status() == 200u16 {
             println!("Rss published: [{}]", item.title.unwrap());
         }
     }

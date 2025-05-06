@@ -10,8 +10,9 @@ test:
 
 # Lint the codebase
 lint:
-    cargo clippy --all-features #-- -D warnings
+    cargo clippy --all-features -- -D warnings
     cargo fmt -- --check
+    echo $?
 
 # Run unit tests with dynamic target
 test-unit:

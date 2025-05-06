@@ -102,7 +102,7 @@ async fn update_last_build_date(d: NaiveDateTime) -> anyhow::Result<()> {
         SqlValue::Text(d.to_string()),
         SqlValue::Text(DB_KEY_LAST_BUILD.to_string()),
     ];
-    let rowset = connection
+    let _rowset = connection
         .execute(
             "UPDATE kv_store SET value = ? WHERE key = ?",
             execute_params.as_slice(),
@@ -177,7 +177,7 @@ async fn post_to_mastodon(msgs: Vec<Item>) -> anyhow::Result<()> {
             .build();
         let response: Response = spin_sdk::http::send(request).await?;
 
-        if response.status().to_owned() == 200u16 {
+        if response.status() == 200u16 {
             println!("Rss published: [{}]", item.title.unwrap());
         }
     }
@@ -226,7 +226,7 @@ fn process_lock() -> anyhow::Result<()> {
     let connection =
         Connection::open("lachuoi").expect("lachuoi db connection error");
     let execute_params = [SqlValue::Text(DB_KEY_LOCK.to_string())];
-    let rowset = connection.execute(
+    let _rowset = connection.execute(
         "INSERT INTO kv_store (key,value) VALUES (?, NULL)",
         execute_params.as_slice(),
     )?;
@@ -238,7 +238,7 @@ fn process_unlock() -> anyhow::Result<()> {
     let connection =
         Connection::open("lachuoi").expect("lachuoi db connection error");
     let execute_params = [SqlValue::Text(DB_KEY_LOCK.to_string())];
-    let rowset = connection.execute(
+    let _rowset = connection.execute(
         "DELETE FROM kv_store WHERE key = ?",
         execute_params.as_slice(),
     )?;
